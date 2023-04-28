@@ -14,8 +14,8 @@
 
 const char* parse_tag( const char* __tag );
 
-void rprint( const std::string& __format , ... );
-void rprint( const std::string& __format , va_list args );
+void rprint( const std::string __format , ... );
+void rprint( const std::string __format , va_list args );
 void rprintf( std::string __msg );
 
 #endif
