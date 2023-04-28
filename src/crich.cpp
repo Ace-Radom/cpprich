@@ -12,3 +12,8 @@ void crprint( const char* __format , ... ){
     va_end( args );
     return;
 }
+
+void crstatus( const char* __text , const char* __status_display_sytle ){
+    rstatus( std::string( __text ) , std::string( __status_display_sytle ) );
+    return;
+}

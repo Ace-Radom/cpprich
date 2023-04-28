@@ -18,4 +18,6 @@ void rprint( const std::string __format , ... );
 void rprint( const std::string __format , va_list args );
 void rprintf( std::string __msg );
 
+void rstatus( const std::string __text , const std::string __status_display_sytle );
+
 #endif
