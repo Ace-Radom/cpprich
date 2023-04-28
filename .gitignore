@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+*.code-workspace
+/bin
+/build
+debug
+release
+test
+test.*
