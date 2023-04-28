@@ -7,6 +7,3 @@ set(CMAKE_CXX_COMPILE_FLAGS -g)
 
 include_directories(include)
 add_subdirectory(src)
-
-add_executable(test test.cpp)
-target_link_libraries(test cpprich)
