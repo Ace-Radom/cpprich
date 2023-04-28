@@ -5,12 +5,7 @@ const char* parse_tag( const char* __tag ){
     {
         if ( strcmp( __tag , Display_Set_List[i].tag ) == 0 )
         {
-            if ( color_type == COLOR_4BIT )
-                return Display_Set_List[i].ANSI_4Bit;
-            if ( color_type == COLOR_8BIT )
-                return Display_Set_List[i].ANSI_8Bit;
-            if ( color_type == COLOR_TRUE )
-                return Display_Set_List[i].ANSI_True;
+            return Display_Set_List[i].ANSI;
         }
     }
     return NULL;

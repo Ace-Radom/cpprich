@@ -15,9 +15,7 @@ extern cpprich_colortype_t color_type;
 
 typedef struct {
     char tag[32];
-    char ANSI_4Bit[32];
-    char ANSI_8Bit[32];
-    char ANSI_True[32];
+    char ANSI[32];
 } cpprich_displaysetlist_t;
 
 #define DISPLAY_SET_LIST_LENGTH 39
