@@ -17,3 +17,11 @@ void crstatus( const char* __text , const char* __status_display_sytle ){
     rstatus( std::string( __text ) , std::string( __status_display_sytle ) );
     return;
 }
+
+void crpanel( const char* __title , const unsigned int __width , const char* __sytle , const unsigned int __line_num , ... ){
+    va_list lines;
+    va_start( lines , __line_num );
+    rpanel( std::string(  __title ) , __width , std::string( __sytle ) , __line_num , lines );
+    va_end( lines );
+    return;
+}
