@@ -1,5 +1,9 @@
 #include"cpprich.hpp"
 
+/**
+ * @note this function needs setlocale(LC_ALL,"")
+ * 
+*/
 size_t get_wstring_column_width( std::string __str ){
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
     std::wstring ws = conv.from_bytes( __str );
@@ -35,10 +39,9 @@ void rpanel( const std::string __title , const unsigned int __width , const std:
     for ( int i = 0 ; i < __line_num ; i++ )
     {
         const char* thisline_msg = va_arg( lines , const char* );
-        std::string thisline( thisline_msg );
-        int space_still_needed_num = __width - get_wstring_column_width( thisline ) - 3;
-        thisline.append( space_still_needed_num , ' ' );
-        rprint( "[%s]│ %s│\n" , __style.c_str() , thisline.c_str() );
+        rprint( "[%s]│ %s" , __style.c_str() , thisline_msg );
+        std::cout << "\033[" << __width << "G";
+        rprint( "[%s]│\n" , __style.c_str() );
     }
     std::string end_line;
     for ( int i = 0 ; i < __width - 2 ; i++ )
