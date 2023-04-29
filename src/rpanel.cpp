@@ -18,28 +18,31 @@ void rpanel( const std::string __title , const unsigned int __width , const std:
 }
 
 void rpanel( const std::string __title , const unsigned int __width , const std::string __style , const unsigned int __line_num , va_list lines ){
-    std::string begin_line;
-    begin_line = "╭─";
-    if ( !__title.empty() )
-        begin_line.append( " " ).append( __title ).append( " " );
-    int straight_still_needed_num = __width - begin_line.size() + 2;
-    for ( int i = 0 ; i < straight_still_needed_num ; i++ )
-        begin_line.append( "─" );
-    begin_line.append( "╮" );
-    rprint( "[%s]%s\n" , __style.c_str() , begin_line.c_str() );
-    // make and print line begin
+    std::string begin_line( __title );
+    if ( begin_line.empty() )
+    {
+        for ( int i = 0 ; i < __width - 2 ; i++ )
+            begin_line.append( "─" );
+    } // no title 
+    else
+    {
+        int straight_still_needed_num = __width - get_wstring_column_width( begin_line ) - 5;
+        begin_line = "─ " + begin_line + " ";
+        for ( int i = 0 ; i < straight_still_needed_num ; i++ )
+            begin_line.append( "─" );
+    }
+    rprint( "[%s]╭%s╮\n" , __style.c_str() , begin_line.c_str() );
     for ( int i = 0 ; i < __line_num ; i++ )
     {
         const char* thisline_msg = va_arg( lines , const char* );
         std::string thisline( thisline_msg );
-        int space_still_needed_num = __width - get_wstring_column_width( thisline ) - 4;
+        int space_still_needed_num = __width - get_wstring_column_width( thisline ) - 3;
         thisline.append( space_still_needed_num , ' ' );
         rprint( "[%s]│ %s│\n" , __style.c_str() , thisline.c_str() );
     }
-    std::string end_line = "╰";
-    for ( int i = 0 ; i < __width - 3 ; i++ )
+    std::string end_line;
+    for ( int i = 0 ; i < __width - 2 ; i++ )
         end_line.append( "─" );
-    end_line.append( "╯" );
-    rprint( "[%s]%s\n" , __style.c_str() , end_line.c_str() );
+    rprint( "[%s]╰%s╯\n" , __style.c_str() , end_line.c_str() );
     return;
 }
