@@ -45,6 +45,11 @@ void rprintf( std::string __msg ){
             } // \[] appears
             int rb_index = __msg.find( ']' , i );
             // find next right bracket
+            if ( rb_index == i + 1 )
+            {
+                i = rb_index;
+                continue;
+            } // [] occurs
             std::string this_tag = __msg.substr( i + 1 , rb_index - i - 1 );
             const char* this_ANSI_code;
             if ( strcmp( this_tag.c_str() , "/" ) == 0 )
