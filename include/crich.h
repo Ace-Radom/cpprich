@@ -14,7 +14,7 @@ void crprint( const char* __format , ... );
 
 void crstatus( const char* __text , const char* __status_display_sytle );
 
-void crpanel( const char* __title , const unsigned int __width , const char* __sytle , const unsigned int __line_num , ... );
+void crpanel( const char* __title , const char* __subtitle , const unsigned int __width , const char* __sytle , const unsigned int __line_num , ... );
 
 #ifdef __cplusplus
 }

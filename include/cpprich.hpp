@@ -23,7 +23,7 @@ void rprintf( std::string __msg );
 
 void rstatus( const std::string __text , const std::string __status_display_sytle );
 
-void rpanel( const std::string __title , const unsigned int __width , const std::string __style , const unsigned int __line_num , ... );
-void rpanel( const std::string __title , const unsigned int __width , const std::string __style , const unsigned int __line_num , va_list lines );
+void rpanel( const std::string __title , const std::string __subtitle , const unsigned int __width , const std::string __style , const unsigned int __line_num , ... );
+void rpanel( const std::string __title , const std::string __subtitle , const unsigned int __width , const std::string __style , const unsigned int __line_num , va_list lines );
 
 #endif

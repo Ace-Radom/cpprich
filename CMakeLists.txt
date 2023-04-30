@@ -6,3 +6,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 include_directories(include)
 add_subdirectory(src)
+
+add_executable(test test.c)
+target_link_libraries(test cpprich)
