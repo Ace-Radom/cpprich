@@ -10,8 +10,11 @@
 #include<codecvt>
 #include<wchar.h>
 #include<locale>
+#include<cmath>
+#include<sys/ioctl.h>
 
 #include"colorlist.h"
+// #include"markdown.hpp"
 
 #define RPRINT_MAX_LENGTH 32767
 
@@ -25,5 +28,9 @@ void rstatus( const std::string __text , const std::string __status_display_sytl
 
 void rpanel( const std::string __title , const std::string __subtitle , const unsigned int __width , const std::string __style , const unsigned int __line_num , ... );
 void rpanel( const std::string __title , const std::string __subtitle , const unsigned int __width , const std::string __style , const unsigned int __line_num , va_list lines );
+
+size_t get_wstring_column_width( std::string __str );
+
+void rtitle( const std::string __title , const unsigned char __level );
 
 #endif
