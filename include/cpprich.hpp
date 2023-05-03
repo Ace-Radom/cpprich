@@ -11,6 +11,7 @@
 #include<wchar.h>
 #include<locale>
 #include<cmath>
+#include<unistd.h>
 #include<sys/ioctl.h>
 
 #include"colorlist.h"
