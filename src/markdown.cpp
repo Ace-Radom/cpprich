@@ -20,11 +20,35 @@ size_t markdown::get_wstring_col_width( std::string __str ){
     return width;
 }
 
+void markdown::pre_format(){
+    std::istringstream istrstream( this -> raw );
+    std::ostringstream ostrstream;
+    std::string this_line;
+    while ( getline( istrstream , this_line ) )
+    {
+        if ( this_line.empty() )
+        {
+            ostrstream << std::endl;
+            continue;
+        }
+        size_t bpos = this_line.find_first_not_of( ' ' );
+        size_t epos = this_line.find_last_not_of( ' ' );
+        if ( epos != std::string::npos )
+            this_line = this_line.substr( bpos , epos - bpos + 1 );
+        this_line.insert( 0 , bpos / 4 * 4 , ' ' );
+        ostrstream << this_line << std::endl;
+    }
+    
+    this -> raw = ostrstream.str();
+    return;
+}
+
 int markdown::parse(){
     if ( this -> raw.empty() )
         return -1;
     // raw not set
 
+    this -> pre_format();
     this -> parsed.clear();
 
     std::istringstream raw_stream( this -> raw );
@@ -107,6 +131,7 @@ int markdown::parse(){
 
         this -> parsed.push_back( std::make_tuple( this_line_sytle , this_line , this_line_extra ) );
     }
+    return 0;
 }
 
 void markdown::print(){

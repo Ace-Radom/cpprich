@@ -40,6 +40,8 @@ class markdown {
 
         size_t get_wstring_col_width( std::string __str );
 
+        void pre_format();
+
         std::string parse_title( std::string __title , const unsigned char __level );
 
 };
