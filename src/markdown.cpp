@@ -172,6 +172,13 @@ int markdown::parse(){
 
             if ( wthis_line[i] == L'`' )
             {
+                if ( i != 0 && wthis_line[i-1] == L'\\' )
+                {
+                    this_block.pop_back();
+                    // delete '\'
+                    this_block += wthis_line[i];
+                    continue;
+                } // Transliteration
                 if ( !this_block.empty() )
                 {
                     this -> parsed.push_back( std::make_tuple( this_line_sytle , conv.to_bytes( this_block ) , this_line_extra , 0 ) );
