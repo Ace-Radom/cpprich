@@ -134,6 +134,25 @@ int markdown::parse(){
 
 #pragma endregion QUOTE
 
+#pragma region UL
+
+        size_t this_line_first_not_space_index = this_line.find_first_not_of( ' ' );
+        if ( this_line_first_not_space_index != std::string::npos && this_line[this_line_first_not_space_index] == '-' && this_line[this_line_first_not_space_index+1] == ' ' )
+        {
+            if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) )
+                this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+            // last block is not UL
+            if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) && std::get<1>( this -> parsed.back() ) != "\n" )
+                this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+            // last block is UL, but not endline
+            this_line_style = BLOCK_UL;
+            this_line_extra = this_line_first_not_space_index / 4 + 1;
+            this -> parsed.push_back( std::make_tuple( BLOCK_UL , "" , -this_line_extra ) );
+            this_line.erase( 0 , this_line_first_not_space_index + 1 );
+        }
+
+#pragma endregion UL
+
         if ( this_line.empty() )
         {
             this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
@@ -142,13 +161,19 @@ int markdown::parse(){
 
         if ( this_line_style == BLOCK_TEXT )
         {
+            size_t space_num = this_line.find_first_not_of( ' ' );
             if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_TEXT ) )
-                this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
-            // last block isn't text
-            if ( std::get<0>( this -> parsed.back() ) & BLOCK_TEXT && std::get<1>( this -> parsed.back() ) == "\n" && this -> parsed.size() > 1 && !( std::get<0>( this -> parsed[this->parsed.size()-2] ) & BLOCK_TEXT ) )
+            {
+                if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_UL || std::get<0>( this -> parsed.back() ) & BLOCK_OL ) && ( space_num / 4 ) == abs( std::get<2>( this -> parsed.back() ) ) )
+                    this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
+                // last block is ul or ol, and indents are same
+                else if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) && !( std::get<0>( this -> parsed.back() ) & BLOCK_OL ) )
+                    this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
+            } // last block isn't text
+            else if ( std::get<0>( this -> parsed.back() ) & BLOCK_TEXT && std::get<1>( this -> parsed.back() ) == "\n" && this -> parsed.size() > 1 && !( std::get<0>( this -> parsed[this->parsed.size()-2] ) & BLOCK_TEXT ) )
                 this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
             // \n given, but before \n isn't text
-            size_t space_num = this_line.find_first_not_of( ' ' );
+            
             if ( space_num == std::string::npos )
                 continue;
             // only contains spaces, continue (but it acutally shouldn't happen)
@@ -246,11 +271,9 @@ int markdown::parse(){
                     }
                 } // judge bold / bold + italic style
                 size_t style_end_index = wthis_line.find( this_block_end_sign , i + 1 );
-                std::cout << style_end_index << std::endl;
                 if ( style_end_index != std::wstring::npos )
                 {
                     this_block = wthis_line.substr( i + this_block_end_sign.size() , style_end_index - i - this_block_end_sign.size() );
-                    std::cout << conv.to_bytes( this_block ) << std::endl;
                     this -> parsed.push_back( std::make_tuple( this_line_style | this_block_style , conv.to_bytes( this_block ) , this_line_extra ) );
                     this_block.clear();
                     i = style_end_index + this_block_end_sign.size() - 1;
@@ -302,6 +325,13 @@ void markdown::print(){
                 continue;
             } // print quote begin, continue
         }
+        else if ( std::get<0>( block ) & BLOCK_UL && std::get<2>( block ) < 0 )
+        {
+            for ( int i = 1 ; i < abs( std::get<2>( block ) ) ; i++ )
+                std::cout << "    ";
+            std::cout << "  \033[93m• \033[0m";
+            continue;
+        } // print UL begin, continue
 
         if ( std::get<0>( block ) & STYLE_CODE )
             std::cout << "\033[40m" << "\033[96m";
