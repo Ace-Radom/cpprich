@@ -33,8 +33,9 @@ void markdown::pre_format(){
         }
         size_t bpos = this_line.find_first_not_of( ' ' );
         size_t epos = this_line.find_last_not_of( ' ' );
-        if ( epos != std::string::npos )
-            this_line = this_line.substr( bpos , epos - bpos + 1 );
+        if ( bpos == std::string::npos && epos == std::string::npos )
+            continue;
+        this_line = this_line.substr( bpos , epos - bpos + 1 );
         this_line.insert( 0 , bpos / 4 * 4 , ' ' );
         ostrstream << this_line << std::endl;
     }
@@ -69,7 +70,7 @@ int markdown::parse(){
         } // get title level (if this line is a title)
         if ( title_level > 0 )
         {
-            this -> parsed.push_back( std::make_tuple( BLOCK_TITLE , this_line.substr( title_level + 1 ) , title_level , 0 ) );
+            this -> parsed.push_back( std::make_tuple( BLOCK_TITLE , this_line.substr( title_level + 1 ) , title_level ) );
             continue;
         } // this line is a title
 
@@ -79,23 +80,23 @@ int markdown::parse(){
 
         if ( this_line.substr( 0 , 3 ) == "```" || this_line.substr( 0 , 3 ) == "~~~" )
         {
-            this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 , 0 ) );
-            this -> parsed.push_back( std::make_tuple( BLOCK_CODEB , "" , 0 , 0 ) );
+            this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+            this -> parsed.push_back( std::make_tuple( BLOCK_CODEB , "" , 0 ) );
             // empty code block begin line
             while ( std::getline( raw_stream , this_line ) )
             {
                 if ( this_line.substr( 0 , 3 ) == "```" || this_line.substr( 0 , 3 ) == "~~~" )
                     break;
-                this -> parsed.push_back( std::make_tuple( BLOCK_CODEB , this_line , 0 , 0 ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_CODEB , this_line , 0 ) );
             } // get all codes in code block
-            this -> parsed.push_back( std::make_tuple( BLOCK_CODEB , "" , 0 , 0 ) );
+            this -> parsed.push_back( std::make_tuple( BLOCK_CODEB , "" , 0 ) );
             // empty code block end line
             continue;
         } // code block start
 
 #pragma endregion CODE_BLOCK
 
-        unsigned int this_line_sytle = BLOCK_TEXT; // line style, for those have consistent style but lots of blocks
+        unsigned int this_line_style = BLOCK_TEXT; // line style, for those have consistent style but lots of blocks
         int this_line_extra = 0;                   // line style extra
 
 #pragma region QUOTE
@@ -107,22 +108,22 @@ int markdown::parse(){
                 count++;
 
             if ( this -> parsed.empty() )
-                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count , 0 ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count ) );
             // this is the first block
             else if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_QUOTE ) && std::get<1>( this -> parsed.back() ) == "\n" )
-                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count , 0 ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count ) );
             // last one is also quote block, and one line ">\n" given
             else if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_QUOTE ) && std::get<2>( this -> parsed.back() ) != count )
             {
-                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "\n" , count , 0 ) );
-                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count , 0 ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "\n" , count ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count ) );
             } // last one is also quote block, one line ">\n" not given, but in different levels
             else if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_QUOTE ) )
             {
-                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "\n" , count , 0 ) );
-                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count , 0 ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "\n" , count ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count ) );
             } // last one isn't quote block
-            this_line_sytle = BLOCK_QUOTE;
+            this_line_style = BLOCK_QUOTE;
             this_line_extra = count;
             this_line = this_line.erase( 0 , count );
             // delete quote start sign
@@ -135,21 +136,30 @@ int markdown::parse(){
 
         if ( this_line.empty() )
         {
-            this -> parsed.push_back( std::make_tuple( this_line_sytle , "\n" , this_line_extra , 0 ) );
+            this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
             continue;
         }
 
-        if ( this_line_sytle == BLOCK_TEXT )
+        if ( this_line_style == BLOCK_TEXT )
         {
             if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_TEXT ) )
-                this -> parsed.push_back( std::make_tuple( this_line_sytle , "\n" , this_line_extra , 0 ) );
+                this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
             // last block isn't text
             if ( std::get<0>( this -> parsed.back() ) & BLOCK_TEXT && std::get<1>( this -> parsed.back() ) == "\n" && this -> parsed.size() > 1 && !( std::get<0>( this -> parsed[this->parsed.size()-2] ) & BLOCK_TEXT ) )
-                this -> parsed.push_back( std::make_tuple( this_line_sytle , "\n" , this_line_extra , 0 ) );
+                this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
             // \n given, but before \n isn't text
-        }
-            
-        // empty line between text and others
+            size_t space_num = this_line.find_first_not_of( ' ' );
+            if ( space_num == std::string::npos )
+                continue;
+            // only contains spaces, continue (but it acutally shouldn't happen)
+            if ( space_num != 0 )
+            {
+                std::string spaces;
+                spaces.append( space_num , ' ' );
+                this -> parsed.push_back( std::make_tuple( this_line_style , spaces , this_line_extra ) );
+                this_line.erase( 0 , space_num );
+            } // push spaces to parsed, delete them in original this_line
+        } // empty line between text and others
 
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
         std::wstring wthis_line = conv.from_bytes( this_line );
@@ -164,7 +174,7 @@ int markdown::parse(){
                 if ( i != 0 && wthis_line[i-1] != ' ' )
                 {
                     this_block.append( L" " );
-                    this -> parsed.push_back( std::make_tuple( this_line_sytle , conv.to_bytes( this_block ) , this_line_extra , 0 ) );
+                    this -> parsed.push_back( std::make_tuple( this_line_style , conv.to_bytes( this_block ) , this_line_extra ) );
                     this_block.clear();
                 }
                 continue;
@@ -178,10 +188,10 @@ int markdown::parse(){
                     // delete '\'
                     this_block += wthis_line[i];
                     continue;
-                } // Transliteration
+                } // Blackslash Transliteration
                 if ( !this_block.empty() )
                 {
-                    this -> parsed.push_back( std::make_tuple( this_line_sytle , conv.to_bytes( this_block ) , this_line_extra , 0 ) );
+                    this -> parsed.push_back( std::make_tuple( this_line_style , conv.to_bytes( this_block ) , this_line_extra ) );
                     this_block.clear();
                 } // push first
                 if ( wthis_line.find( L'`' , i + 1 ) == i + 1 )
@@ -190,7 +200,7 @@ int markdown::parse(){
                     if ( code_end_index != std::wstring::npos )
                     {
                         this_block = wthis_line.substr( i + 2 , code_end_index - i - 2 );
-                        this -> parsed.push_back( std::make_tuple( this_line_sytle | STYLE_CODE , conv.to_bytes( this_block ) , this_line_extra , 0 ) );
+                        this -> parsed.push_back( std::make_tuple( this_line_style | STYLE_CODE , conv.to_bytes( this_block ) , this_line_extra ) );
                         this_block.clear();
                         i = code_end_index + 1;
                         continue;
@@ -200,17 +210,58 @@ int markdown::parse(){
                 {
                     size_t code_end_index = wthis_line.find( L'`' , i + 1 );
                     this_block = wthis_line.substr( i + 1 , code_end_index - i - 1 );
-                    this -> parsed.push_back( std::make_tuple( this_line_sytle | STYLE_CODE , conv.to_bytes( this_block ) , this_line_extra , 0 ) );
+                    this -> parsed.push_back( std::make_tuple( this_line_style | STYLE_CODE , conv.to_bytes( this_block ) , this_line_extra ) );
                     this_block.clear();
                     i = code_end_index;
                     continue;
                 } // one '`'
             } // code
 
+            if ( wthis_line[i] == L'*' )
+            {
+                if ( i != 00 && wthis_line[i-1] == L'\\' )
+                {
+                    this_block.pop_back();
+                    // delete '\'
+                    this_block += wthis_line[i];
+                    continue;
+                } // Blachslash Transliteration
+                if ( !this_block.empty() )
+                {
+                    this -> parsed.push_back( std::make_tuple( this_line_style , conv.to_bytes( this_block ) , this_line_extra ) );
+                    this_block.clear();
+                } // push first
+
+                unsigned int this_block_style = STYLE_ITALIC;
+                std::wstring this_block_end_sign;
+                this_block_end_sign = L"*";
+                if ( wthis_line.find( L'*' , i + 1 ) == i + 1 )
+                {
+                    this_block_style = STYLE_BOLD;
+                    this_block_end_sign = L"**";
+                    if ( wthis_line.find( L'*' , i + 2 ) == i + 2 )
+                    {
+                        this_block_style |= STYLE_ITALIC;
+                        this_block_end_sign = L"***";
+                    }
+                } // judge bold / bold + italic style
+                size_t style_end_index = wthis_line.find( this_block_end_sign , i + 1 );
+                std::cout << style_end_index << std::endl;
+                if ( style_end_index != std::wstring::npos )
+                {
+                    this_block = wthis_line.substr( i + this_block_end_sign.size() , style_end_index - i - this_block_end_sign.size() );
+                    std::cout << conv.to_bytes( this_block ) << std::endl;
+                    this -> parsed.push_back( std::make_tuple( this_line_style | this_block_style , conv.to_bytes( this_block ) , this_line_extra ) );
+                    this_block.clear();
+                    i = style_end_index + this_block_end_sign.size() - 1;
+                    continue;
+                }
+            } // bold, italic, bold + italic
+
             this_block += wthis_line[i];
         }
 
-        this -> parsed.push_back( std::make_tuple( this_line_sytle , conv.to_bytes( this_block ) , this_line_extra , 0 ) );
+        this -> parsed.push_back( std::make_tuple( this_line_style , conv.to_bytes( this_block ) , this_line_extra ) );
     }
     return 0;
 }
@@ -254,6 +305,12 @@ void markdown::print(){
 
         if ( std::get<0>( block ) & STYLE_CODE )
             std::cout << "\033[40m" << "\033[96m";
+
+        if ( std::get<0>( block ) & STYLE_BOLD )
+            std::cout << "\033[1m";
+        
+        if ( std::get<0>( block ) & STYLE_ITALIC )
+            std::cout << "\033[3m";
 
         std::cout << std::get<1>( block ) << "\033[0m";
     }

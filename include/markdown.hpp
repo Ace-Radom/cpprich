@@ -19,7 +19,7 @@
 #define BLOCK_QUOTE  0b000100000000
 #define BLOCK_UL     0b000010000000 // unordered list
 #define BLOCK_OL     0b000001000000 // ordered list
-#define STYLE_STRONG 0b000000000001
+#define STYLE_BOLD   0b000000000001
 #define STYLE_ITALIC 0b000000000010
 #define STYLE_CODE   0b000000000100
 
@@ -33,8 +33,8 @@ class markdown {
 
     private:
         std::string raw;
-        std::vector<std::tuple<unsigned int,std::string,int,unsigned int>> parsed;
-        // <block type / style , block data , extra info (for title, quote, ul and ol), indents>
+        std::vector<std::tuple<unsigned int,std::string,int>> parsed;
+        // <block type / style , block data , extra info (for title, quote, ul and ol)>
         size_t terminal_col;
         size_t terminal_row;
 
