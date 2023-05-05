@@ -33,8 +33,8 @@ class markdown {
 
     private:
         std::string raw;
-        std::vector<std::tuple<unsigned int,std::string,int>> parsed;
-        // <block type / style , block data , extra info (for title, quote, ul and ol)>
+        std::vector<std::tuple<unsigned int,std::string,int,unsigned int>> parsed;
+        // <block type / style , block data , extra info (for title, quote, ul and ol), indents>
         size_t terminal_col;
         size_t terminal_row;
 
