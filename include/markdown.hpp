@@ -2,6 +2,7 @@
 #define _MARKDOWN_HPP_
 
 #include<iostream>
+#include<iomanip>
 #include<string>
 #include<sstream>
 #include<stack>

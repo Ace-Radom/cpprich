@@ -134,9 +134,10 @@ int markdown::parse(){
 
 #pragma endregion QUOTE
 
+        size_t this_line_first_not_space_index = this_line.find_first_not_of( ' ' );
+
 #pragma region UL
 
-        size_t this_line_first_not_space_index = this_line.find_first_not_of( ' ' );
         if ( this_line_first_not_space_index != std::string::npos && this_line[this_line_first_not_space_index] == '-' && this_line[this_line_first_not_space_index+1] == ' ' )
         {
             if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) )
@@ -152,6 +153,39 @@ int markdown::parse(){
         }
 
 #pragma endregion UL
+
+#pragma region OL
+
+        if ( this_line_first_not_space_index != std::string::npos )
+        {
+            size_t this_line_first_point = this_line.find( '.' , this_line_first_not_space_index );
+            if ( this_line_first_point != std::string::npos && this_line_first_point != this_line_first_not_space_index )
+            {
+                std::string this_num_str = this_line.substr( this_line_first_not_space_index , this_line_first_point - this_line_first_not_space_index );
+                for ( auto c : this_num_str )
+                    if ( !std::isdigit( c ) )
+                        goto endof_OL;
+                // judge if this_num is really a num; if not, goto endof_OL
+                int this_num = std::stoi( this_num_str ); // OL num
+                if ( this_num > 0 )
+                {
+                    if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_OL ) )
+                        this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+                    // last block is not OL
+                    if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_OL ) && std::get<1>( this -> parsed.back() ) != "\n" )
+                        this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+                    // last block is OL, but not endline
+                    this_line_style = BLOCK_OL;
+                    this_line_extra = this_line_first_not_space_index / 4 + 1;
+                    this -> parsed.push_back( std::make_tuple( BLOCK_OL , std::to_string( this_num ) , -this_line_extra ) );
+                    this_line.erase( 0 , this_line_first_point + 1 );
+                }
+            } // point found, and not the first not-space char
+        }
+
+endof_OL:
+
+#pragma endregion OL
 
         if ( this_line.empty() )
         {
@@ -296,11 +330,8 @@ void markdown::print(){
     this -> terminal_col = size.ws_col;
     // get terminal size
 
-    size_t index = -1;
-
     for ( auto block : this -> parsed )
     {
-        index++;
         if ( std::get<0>( block ) == BLOCK_TITLE )
         {
             std::cout << this -> parse_title( std::get<1>( block ) , std::get<2>( block ) );
@@ -332,6 +363,13 @@ void markdown::print(){
             std::cout << "  \033[93m• \033[0m";
             continue;
         } // print UL begin, continue
+        else if ( std::get<0>( block ) & BLOCK_OL && std::get<2>( block ) < 0 )
+        {
+            for ( int i = 1 ; i < abs( std::get<2>( block ) ) ; i++ )
+                std::cout << "    ";
+            std::cout << "\033[93m" << std::setw( 2 ) << std::right << std::get<1>( block ) << ". \033[0m";
+            continue;
+        }
 
         if ( std::get<0>( block ) & STYLE_CODE )
             std::cout << "\033[40m" << "\033[96m";
