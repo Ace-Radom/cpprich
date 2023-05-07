@@ -80,7 +80,15 @@ int markdown::parse(){
 
         if ( this_line.substr( 0 , 3 ) == "```" || this_line.substr( 0 , 3 ) == "~~~" )
         {
-            this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+            if ( !this -> parsed.empty() )
+            {
+                if ( this -> parsed.size() == 1 )
+                    this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+                else if ( std::get<1>( this -> parsed.back() ) == "\n" && std::get<1>( this -> parsed[this -> parsed.size()-2] ) != "\n" )
+                    this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+                else if ( std::get<1>( this -> parsed.back() ) != "\n" )
+                    this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n\n" , 0 ) );
+            }
             this -> parsed.push_back( std::make_tuple( BLOCK_CODEB , "" , 0 ) );
             // empty code block begin line
             while ( std::getline( raw_stream , this_line ) )
@@ -115,12 +123,12 @@ int markdown::parse(){
             // last one is also quote block, and one line ">\n" given
             else if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_QUOTE ) && std::get<2>( this -> parsed.back() ) != count )
             {
-                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "\n" , count ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , count ) );
                 this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count ) );
             } // last one is also quote block, one line ">\n" not given, but in different levels
             else if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_QUOTE ) )
             {
-                this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "\n" , count ) );
+                this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , count ) );
                 this -> parsed.push_back( std::make_tuple( BLOCK_QUOTE , "" , -count ) );
             } // last one isn't quote block
             this_line_style = BLOCK_QUOTE;
@@ -334,7 +342,7 @@ void markdown::print(){
     {
         if ( std::get<0>( block ) == BLOCK_TITLE )
         {
-            std::cout << this -> parse_title( std::get<1>( block ) , std::get<2>( block ) );
+            std::cout << std::endl << this -> parse_title( std::get<1>( block ) , std::get<2>( block ) );
             continue;
         } // print title
         else if ( std::get<0>( block ) == BLOCK_CODEB )
