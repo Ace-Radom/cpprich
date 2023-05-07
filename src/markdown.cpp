@@ -68,7 +68,7 @@ int markdown::parse(){
             else
                 break;
         } // get title level (if this line is a title)
-        if ( title_level > 0 )
+        if ( title_level > 0 && title_level <= 6 )
         {
             this -> parsed.push_back( std::make_tuple( BLOCK_TITLE , this_line.substr( title_level + 1 ) , title_level ) );
             continue;
@@ -140,10 +140,10 @@ int markdown::parse(){
 
         if ( this_line_first_not_space_index != std::string::npos && this_line[this_line_first_not_space_index] == '-' && this_line[this_line_first_not_space_index+1] == ' ' )
         {
-            if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) )
+            if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) && !( this -> parsed.empty() ) )
                 this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
             // last block is not UL
-            if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) && std::get<1>( this -> parsed.back() ) != "\n" )
+            if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) && std::get<1>( this -> parsed.back() ) != "\n" && !( this -> parsed.empty() ) )
                 this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
             // last block is UL, but not endline
             this_line_style = BLOCK_UL;
@@ -169,10 +169,10 @@ int markdown::parse(){
                 int this_num = std::stoi( this_num_str ); // OL num
                 if ( this_num > 0 )
                 {
-                    if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_OL ) )
+                    if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_OL ) && !( this -> parsed.empty() ) )
                         this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
                     // last block is not OL
-                    if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_OL ) && std::get<1>( this -> parsed.back() ) != "\n" )
+                    if ( ( std::get<0>( this -> parsed.back() ) & BLOCK_OL ) && std::get<1>( this -> parsed.back() ) != "\n" && !( this -> parsed.empty() ) )
                         this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
                     // last block is OL, but not endline
                     this_line_style = BLOCK_OL;
@@ -193,7 +193,7 @@ endof_OL:
             continue;
         }
 
-        if ( this_line_style == BLOCK_TEXT )
+        if ( this_line_style == BLOCK_TEXT && !( this -> parsed.empty() ) )
         {
             size_t space_num = this_line.find_first_not_of( ' ' );
             if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_TEXT ) )
