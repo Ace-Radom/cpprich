@@ -2,6 +2,8 @@
 
 #define JUDGE_NULL( str ) ( str == NULL ) ? "" : str
 
+markdown md( "" );
+
 void cpprich_init( cpprich_colortype_t __colortype ){
     color_type = __colortype;
     return;
@@ -25,5 +27,25 @@ void crpanel( const char* __title , const char* __subtitle , const unsigned int 
     va_start( lines , __line_num );
     rpanel( std::string( JUDGE_NULL( __title ) ) , std::string( JUDGE_NULL( __subtitle ) ) , __width , std::string( JUDGE_NULL( __sytle ) ) , __line_num , lines );
     va_end( lines );
+    return;
+}
+
+void crtitle( const char* __title , const unsigned char __level ){
+    rtitle( std::string( JUDGE_NULL( __title ) ) , __level );
+    return;
+}
+
+void md_set( const char* __raw ){
+    md.set( std::string( JUDGE_NULL( __raw ) ) );
+    return;
+}
+
+void md_parse(){
+    md.parse();
+    return;
+}
+
+void md_print(){
+    md.print();
     return;
 }
