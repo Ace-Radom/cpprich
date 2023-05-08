@@ -24,6 +24,7 @@ void markdown::pre_format(){
     std::istringstream istrstream( this -> raw );
     std::ostringstream ostrstream;
     std::string this_line;
+    bool in_code_block = false;
     while ( getline( istrstream , this_line ) )
     {
         if ( this_line.empty() )
@@ -31,12 +32,24 @@ void markdown::pre_format(){
             ostrstream << std::endl;
             continue;
         }
-        size_t bpos = this_line.find_first_not_of( ' ' );
-        size_t epos = this_line.find_last_not_of( ' ' );
-        if ( bpos == std::string::npos && epos == std::string::npos )
+
+        if ( this_line.find( "```" ) != std::string::npos )
+        {
+            in_code_block = !in_code_block;
+            ostrstream << this_line << std::endl;
             continue;
-        this_line = this_line.substr( bpos , epos - bpos + 1 );
-        this_line.insert( 0 , bpos / 4 * 4 , ' ' );
+        }
+            
+        if ( !in_code_block )
+        {
+            size_t bpos = this_line.find_first_not_of( ' ' );
+            size_t epos = this_line.find_last_not_of( ' ' );
+            if ( bpos == std::string::npos && epos == std::string::npos )
+                continue;
+            this_line = this_line.substr( bpos , epos - bpos + 1 );
+            this_line.insert( 0 , bpos / 4 * 4 , ' ' );
+        } // if now in a code block, don't pre-format line begin
+
         ostrstream << this_line << std::endl;
     }
     this -> raw = ostrstream.str();
@@ -84,10 +97,16 @@ int markdown::parse(){
             {
                 if ( this -> parsed.size() == 1 )
                     this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
-                else if ( std::get<1>( this -> parsed.back() ) == "\n" && std::get<1>( this -> parsed[this -> parsed.size()-2] ) != "\n" )
+                // only one block before
+                else if ( std::get<1>( this -> parsed.back() ) == "\n" && std::get<1>( this -> parsed[this->parsed.size()-2] ) != "\n" && std::get<0>( this -> parsed[this->parsed.size()-2] ) != BLOCK_TITLE )
                     this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
-                else if ( std::get<1>( this -> parsed.back() ) != "\n" )
+                // last block is endline, but second last one isn't and the second last one is not a title
+                else if ( std::get<1>( this -> parsed.back() ) != "\n" && std::get<0>( this -> parsed.back() ) != BLOCK_TITLE )
                     this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n\n" , 0 ) );
+                // last block is not endline and not title
+                else if ( std::get<1>( this -> parsed.back() ) != "\n" && std::get<0>( this -> parsed.back() ) == BLOCK_TITLE )
+                    this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
+                // last block is not endline but title
             }
             this -> parsed.push_back( std::make_tuple( BLOCK_CODEB , "" , 0 ) );
             // empty code block begin line
@@ -212,7 +231,7 @@ endof_OL:
                 else if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) && !( std::get<0>( this -> parsed.back() ) & BLOCK_OL ) )
                     this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
             } // last block isn't text
-            else if ( std::get<0>( this -> parsed.back() ) & BLOCK_TEXT && std::get<1>( this -> parsed.back() ) == "\n" && this -> parsed.size() > 1 && !( std::get<0>( this -> parsed[this->parsed.size()-2] ) & BLOCK_TEXT ) )
+            else if ( std::get<0>( this -> parsed.back() ) & BLOCK_TEXT && std::get<1>( this -> parsed.back() ) == "\n" && this -> parsed.size() > 1 && !( std::get<0>( this -> parsed[this->parsed.size()-2] ) & BLOCK_TEXT && !( std::get<0>( this -> parsed[this->parsed.size()-2] ) == BLOCK_TITLE ) ) )
                 this -> parsed.push_back( std::make_tuple( this_line_style , "\n" , this_line_extra ) );
             // \n given, but before \n isn't text
             
