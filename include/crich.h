@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 #include<stdarg.h>
+#include<stdbool.h>
 #include"colorlist.h"
 
 void cpprich_init( cpprich_colortype_t __colortype );
@@ -22,7 +23,7 @@ void crtitle( const char* __title , const unsigned char __level );
 void md_set( const char* __raw );
 void md_append( const char* __raw );
 void md_parse();
-void md_print();
+void md_print( bool __use_auto_endline );
 
 #ifdef __cplusplus
 }

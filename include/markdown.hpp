@@ -12,6 +12,8 @@
 #include<cmath>
 #include<locale>
 #include<unistd.h>
+#include<termio.h>
+#include<sys/time.h>
 #include<sys/ioctl.h>
 
 #define BLOCK_TITLE  0b100000000000
@@ -30,7 +32,7 @@ class markdown {
         void set( std::string __raw );
         void append( std::string __raw );
         int parse();
-        void print();
+        void print( bool __use_auto_endline );
 
     private:
         std::string raw;

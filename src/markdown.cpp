@@ -20,6 +20,39 @@ size_t markdown::get_wstring_col_width( std::string __str ){
     return width;
 }
 
+int get_cursor_position( size_t* x , size_t* y ){
+    fd_set readset;
+    int success = 0;
+    struct timeval time;
+    struct termios term , initial_term;
+
+    tcgetattr( STDIN_FILENO , &initial_term );
+    term = initial_term;
+    term.c_lflag &= ~ICANON;
+    term.c_lflag &= ~ECHO;
+    tcsetattr( STDIN_FILENO , TCSANOW , &term );
+
+    printf( "\33[6n" );
+    fflush( stdout );
+    // request position
+
+    FD_ZERO( &readset );
+    FD_SET( STDIN_FILENO , &readset );
+    time.tv_sec = 0;
+    time.tv_usec = 5000;
+    // wait 100ms for a terminal answer
+
+    if ( select( STDIN_FILENO + 1 , &readset , NULL , NULL , &time ) == 1 )
+        if ( scanf( "\033[%ld;%ldR" , y , x ) == 2 )
+            success = 1;
+    // If it success, try to read the cursor value
+
+    tcsetattr( STDIN_FILENO , TCSADRAIN , &initial_term );
+    // set back the properties of the terminal
+
+    return success;
+}
+
 void markdown::pre_format(){
     std::istringstream istrstream( this -> raw );
     std::ostringstream ostrstream;
@@ -81,7 +114,7 @@ int markdown::parse(){
             else
                 break;
         } // get title level (if this line is a title)
-        if ( title_level > 0 && title_level <= 6 )
+        if ( title_level > 0 && title_level <= 6 && this_line.size() > title_level )
         {
             this -> parsed.push_back( std::make_tuple( BLOCK_TITLE , this_line.substr( title_level + 1 ) , title_level ) );
             continue;
@@ -125,6 +158,7 @@ int markdown::parse(){
 
         unsigned int this_line_style = BLOCK_TEXT; // line style, for those have consistent style but lots of blocks
         int this_line_extra = 0;                   // line style extra
+        size_t this_line_first_not_space_index = this_line.find_first_not_of( ' ' );
 
 #pragma region QUOTE
 
@@ -161,11 +195,9 @@ int markdown::parse(){
 
 #pragma endregion QUOTE
 
-        size_t this_line_first_not_space_index = this_line.find_first_not_of( ' ' );
-
 #pragma region UL
 
-        if ( this_line_first_not_space_index != std::string::npos && this_line[this_line_first_not_space_index] == '-' && this_line[this_line_first_not_space_index+1] == ' ' )
+        else if ( this_line_first_not_space_index != std::string::npos && this_line[this_line_first_not_space_index] == '-' && this_line[this_line_first_not_space_index+1] == ' ' )
         {
             if ( !( std::get<0>( this -> parsed.back() ) & BLOCK_UL ) && !( this -> parsed.empty() ) )
                 this -> parsed.push_back( std::make_tuple( BLOCK_TEXT , "\n" , 0 ) );
@@ -183,7 +215,7 @@ int markdown::parse(){
 
 #pragma region OL
 
-        if ( this_line_first_not_space_index != std::string::npos )
+        else if ( this_line_first_not_space_index != std::string::npos )
         {
             size_t this_line_first_point = this_line.find( '.' , this_line_first_not_space_index );
             if ( this_line_first_point != std::string::npos && this_line_first_point != this_line_first_not_space_index )
@@ -265,6 +297,14 @@ endof_OL:
                 }
                 continue;
             } // match space
+
+            if ( wthis_line[i] == L'。' || wthis_line[i] == L'，' || wthis_line[i] == L'！' || wthis_line[i] == L'？' || wthis_line[i] == L'：' || wthis_line[i] == L'；' )
+            {
+                this_block += wthis_line[i];
+                this -> parsed.push_back( std::make_tuple( this_line_style , conv.to_bytes( this_block ) , this_line_extra ) );
+                this_block.clear();
+                continue;
+            }
 
             if ( wthis_line[i] == L'`' )
             {
@@ -350,7 +390,7 @@ endof_OL:
     return 0;
 }
 
-void markdown::print(){
+void markdown::print( bool __use_auto_endline ){
     struct winsize size;
     ioctl( STDOUT_FILENO , TIOCGWINSZ , &size );
     this -> terminal_row = size.ws_row;
@@ -397,6 +437,15 @@ void markdown::print(){
             std::cout << "\033[93m" << std::setw( 2 ) << std::right << std::get<1>( block ) << ". \033[0m";
             continue;
         }
+
+        if ( __use_auto_endline )
+        {
+            size_t x , y;
+            get_cursor_position( &x , &y );
+            if ( this -> terminal_col - x < get_wstring_col_width( std::get<1>( block ) ) + 1 )
+                std::cout << std::endl;
+        }
+        
 
         if ( std::get<0>( block ) & STYLE_CODE )
             std::cout << "\033[40m" << "\033[96m";

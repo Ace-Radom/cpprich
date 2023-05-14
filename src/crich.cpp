@@ -45,7 +45,7 @@ void md_parse(){
     return;
 }
 
-void md_print(){
-    md.print();
+void md_print( bool __use_auto_endline ){
+    md.print( __use_auto_endline );
     return;
 }
