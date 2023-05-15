@@ -443,8 +443,9 @@ void markdown::print( bool __use_auto_endline ){
             size_t x , y;
             get_cursor_position( &x , &y );
             size_t this_block_width = get_wstring_col_width( std::get<1>( block ) );
-            if ( this -> terminal_col - x < this_block_width + 1 && this_block_width < this -> terminal_col )
+            if ( this -> terminal_col - x < this_block_width + 1 && this_block_width < this -> terminal_col / 2 )
                 std::cout << std::endl;
+            // only end line when this block width is not longer than half of the terminal width
         }
         
 
