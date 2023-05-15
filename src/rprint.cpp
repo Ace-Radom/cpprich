@@ -32,7 +32,7 @@ void rprintf( std::string __msg ){
     std::stack<const char*> ANSI_codes;
     std::string outstr;
     outstr.clear();
-    for ( int i = 0 ; i < __msg.size() ; i++ )
+    for ( std::size_t i = 0 ; i < __msg.size() ; i++ )
     {
         if ( __msg[i] == '[' )
         {
@@ -43,7 +43,7 @@ void rprintf( std::string __msg ){
                 outstr += __msg[i];
                 continue;
             } // \[] appears
-            int rb_index = __msg.find( ']' , i );
+            size_t rb_index = __msg.find( ']' , i );
             // find next right bracket
             if ( rb_index == i + 1 )
             {

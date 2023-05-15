@@ -25,7 +25,7 @@ void rpanel( const std::string __title , const std::string __subtitle , const un
     std::string begin_line( __title );
     if ( begin_line.empty() )
     {
-        for ( int i = 0 ; i < __width - 2 ; i++ )
+        for ( unsigned int i = 0 ; i < __width - 2 ; i++ )
             begin_line.append( "─" );
     } // no title 
     else
@@ -36,7 +36,7 @@ void rpanel( const std::string __title , const std::string __subtitle , const un
             begin_line.append( "─" );
     }
     rprint( "[%s]╭%s╮\n" , __style.c_str() , begin_line.c_str() );
-    for ( int i = 0 ; i < __line_num ; i++ )
+    for ( unsigned int i = 0 ; i < __line_num ; i++ )
     {
         const char* thisline_msg = va_arg( lines , const char* );
         rprint( "[%s]│ %s" , __style.c_str() , thisline_msg );
@@ -46,7 +46,7 @@ void rpanel( const std::string __title , const std::string __subtitle , const un
     std::string end_line;
     if ( __subtitle.empty() )
     {
-        for ( int i = 0 ; i < __width - 2 ; i++ )
+        for ( unsigned int i = 0 ; i < __width - 2 ; i++ )
             end_line.append( "─" );
     } // no subtitle
     else
@@ -54,10 +54,10 @@ void rpanel( const std::string __title , const std::string __subtitle , const un
         unsigned int subtitle_width = get_wstring_column_width( __subtitle ) + 2; // including two spaces
         unsigned int straight_left = ( ( __width - 2 ) - subtitle_width ) / 2;
         unsigned int straight_right = __width - 2 - subtitle_width - straight_left;
-        for ( int i = 0 ; i < straight_left ; i++ )
+        for ( unsigned int i = 0 ; i < straight_left ; i++ )
             end_line.append( "─" );
         end_line.append( " " ).append( __subtitle ).append( " " );
-        for ( int i = 0 ; i < straight_right ; i++ )
+        for ( unsigned int i = 0 ; i < straight_right ; i++ )
             end_line.append( "─" );
     }
     rprint( "[%s]╰%s╯\n" , __style.c_str() , end_line.c_str() );

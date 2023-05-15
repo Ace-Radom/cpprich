@@ -107,7 +107,7 @@ int markdown::parse(){
 #pragma region TITLE
 
         unsigned char title_level = 0;
-        for ( int i = 0 ; i < 6 && i < this_line.size() ; i++ )
+        for ( std::size_t i = 0 ; i < 6 && i < this_line.size() ; i++ )
         {
             if ( this_line[i] == '#' )
                 title_level++;
@@ -285,7 +285,7 @@ endof_OL:
 
         this_block.clear();
 
-        for ( int i = 0 ; i < wthis_line.size() ; i++ )
+        for ( std::size_t i = 0 ; i < wthis_line.size() ; i++ )
         {
             if ( wthis_line[i] == L' ' )
             {
@@ -407,7 +407,7 @@ void markdown::print( bool __use_auto_endline ){
         else if ( std::get<0>( block ) == BLOCK_CODEB )
         {
             std::cout << "\033[48;2;39;40;34m";
-            for ( int i = 0 ; i < this -> terminal_col ; i++ )
+            for ( std::size_t i = 0 ; i < this -> terminal_col ; i++ )
                 std::cout << " ";
             std::cout << "\r " << std::get<1>( block ) << "\033[0m";
             continue;

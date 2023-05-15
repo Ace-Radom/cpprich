@@ -3,12 +3,12 @@
 void rtitle1( const std::string __title , const size_t __col ){
     size_t col = round( ( __col - get_wstring_column_width( __title ) ) / 2.0 );
     std::cout << "\033[1m" << "┏";
-    for ( int i = 0 ; i < __col - 2 ; i++ )
+    for ( size_t i = 0 ; i < __col - 2 ; i++ )
         std::cout << "━";
     std::cout << "┓" << std::endl;
-    printf( "┃\033[%dG%s\033[%dG┃\n" , col , __title.c_str() , __col );
+    printf( "┃\033[%ldG%s\033[%ldG┃\n" , col , __title.c_str() , __col );
     std::cout << "┗";
-    for ( int i = 0 ; i < __col - 2 ; i++ )
+    for ( size_t i = 0 ; i < __col - 2 ; i++ )
         std::cout << "━";
     std::cout << "┛" << "\033[0m" << std::endl << std::endl << std::endl;
     return;
@@ -16,31 +16,31 @@ void rtitle1( const std::string __title , const size_t __col ){
 
 void rtitle2( const std::string __title , const size_t __col ){
     size_t col = round( ( __col - get_wstring_column_width( __title ) ) / 2.0 );
-    printf( "\033[1m\033[4m\033[%dG%s\033[0m\n\n" , col , __title.c_str() );
+    printf( "\033[1m\033[4m\033[%ldG%s\033[0m\n\n" , col , __title.c_str() );
     return;
 }
 
 void rtitle3( const std::string __title , const size_t __col ){
     size_t col = round( ( __col - get_wstring_column_width( __title ) ) / 2.0 );
-    printf( "\033[1m\033[%dG%s\033[0m\n\n" , col , __title.c_str() );
+    printf( "\033[1m\033[%ldG%s\033[0m\n\n" , col , __title.c_str() );
     return;
 }
 
 void rtitle4( const std::string __title , const size_t __col ){
     size_t col = round( ( __col - get_wstring_column_width( __title ) ) / 2.0 );
-    printf( "\033[2m\033[1m\033[%dG%s\033[0m\n\n" , col , __title.c_str() );
+    printf( "\033[2m\033[1m\033[%ldG%s\033[0m\n\n" , col , __title.c_str() );
     return;
 }
 
 void rtitle5( const std::string __title , const size_t __col ){
     size_t col = round( ( __col - get_wstring_column_width( __title ) ) / 2.0 );
-    printf( "\033[4m\033[%dG%s\033[0m\n\n" , col , __title.c_str() );
+    printf( "\033[4m\033[%ldG%s\033[0m\n\n" , col , __title.c_str() );
     return;
 }
 
 void rtitle6( const std::string __title , const size_t __col ){
     size_t col = round( ( __col - get_wstring_column_width( __title ) ) / 2.0 );
-    printf( "\033[3m\033[%dG%s\033[0m\n\n" , col , __title.c_str() );
+    printf( "\033[3m\033[%ldG%s\033[0m\n\n" , col , __title.c_str() );
     return;
 }
 

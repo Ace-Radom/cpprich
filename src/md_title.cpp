@@ -7,12 +7,12 @@ std::string markdown::parse_title( std::string __title , const unsigned char __l
     {
         case 1:
             title.append( "\033[1m┏" );
-            for ( int i = 0 ; i < this -> terminal_col - 2 ; i++ )
+            for ( size_t i = 0 ; i < this -> terminal_col - 2 ; i++ )
                 title.append( "━" );
             title.append( "┓\n" );
             title.append( "┃\033[" ).append( std::to_string( col ) ).append( "G" ).append( __title ).append( "\033[" ).append( std::to_string( this -> terminal_col ) ).append( "G┃\n" );
             title.append( "┗" );
-            for ( int i = 0 ; i < this -> terminal_col - 2 ; i++ )
+            for ( size_t i = 0 ; i < this -> terminal_col - 2 ; i++ )
                 title.append( "━" );
             title.append( "┛\033[0m\n\n\n" );
             break;
