@@ -409,7 +409,7 @@ void markdown::print( bool __use_auto_endline ){
             std::cout << "\033[48;2;39;40;34m";
             for ( std::size_t i = 0 ; i < this -> terminal_col ; i++ )
                 std::cout << " ";
-            std::cout << "\r " << std::get<1>( block ) << "\033[0m";
+            std::cout << "\r " << std::get<1>( block ) << "\033[0m\n";
             continue;
         } // print code block
         else if ( std::get<0>( block ) & BLOCK_QUOTE )
