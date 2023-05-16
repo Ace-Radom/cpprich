@@ -26,6 +26,12 @@
 #define STYLE_ITALIC 0b000000000010
 #define STYLE_CODE   0b000000000100
 
+#ifdef READ_CURSOR_DELAY
+#define CPPRCD READ_CURSOR_DELAY
+#else
+#define CPPRCD 5000
+#endif
+
 class markdown {
     public:
         markdown( std::string __raw );
